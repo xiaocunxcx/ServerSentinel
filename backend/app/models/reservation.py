@@ -1,4 +1,5 @@
 import enum
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -18,6 +19,9 @@ class Reservation(Base):
     start_time = Column(DateTime, nullable=False)
     end_time = Column(DateTime, nullable=False)
     type = Column(Enum(ReservationType), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), 
+                       onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
     user_id = Column(Integer, ForeignKey("users.id"))
     node_id = Column(Integer, ForeignKey("nodes.id"))

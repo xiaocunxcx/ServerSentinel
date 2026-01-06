@@ -3,7 +3,7 @@ API dependencies for authentication and database access.
 """
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -59,3 +59,33 @@ def get_current_active_admin(
             detail="Not enough privileges. Admin access required.",
         )
     return current_user
+
+
+def get_client_ip(request: Request) -> str:
+    """
+    Extract client IP address from request.
+    
+    Supports reverse proxy scenarios by checking X-Forwarded-For and X-Real-IP headers.
+    
+    Args:
+        request: FastAPI Request object
+    
+    Returns:
+        Client IP address as string
+    """
+    # Priority 1: X-Forwarded-For header (if behind reverse proxy)
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        # X-Forwarded-For can contain multiple IPs, take the first one
+        return forwarded.split(",")[0].strip()
+    
+    # Priority 2: X-Real-IP header (alternative reverse proxy header)
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip
+    
+    # Priority 3: Direct connection IP
+    if request.client:
+        return request.client.host
+    
+    return "unknown"

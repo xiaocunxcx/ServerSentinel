@@ -1,7 +1,8 @@
 """
 Reservation service - handles business logic for resource reservations.
 """
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -46,9 +47,15 @@ def create_reservation(
     return crud_reservation.create_reservation(db, reservation_data, user_id)
 
 
-def get_active_reservations(db: Session, node_id: int = None):
-    """Get all currently active reservations, optionally filtered by node."""
-    now = datetime.utcnow()
-    # This would call a new CRUD function
-    # For now, return placeholder
-    return []
+def get_active_reservations(db: Session, node_id: Optional[int] = None):
+    """
+    Get all currently active reservations, optionally filtered by node.
+    
+    Args:
+        db: Database session
+        node_id: Optional node ID to filter by
+    
+    Returns:
+        List of active reservations
+    """
+    return crud_reservation.get_active_reservations(db, node_id)

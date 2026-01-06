@@ -18,8 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-load_dotenv()
-
 # Then set the sqlalchemy.url from the environment variable
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 
