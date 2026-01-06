@@ -1,8 +1,8 @@
-# ServerSentinel - 项目任务分解 (Task Breakdown - Python/MySQL Stack)
+# ServerSentinel - 项目任务分解 (Task Breakdown - Python/SQLite Stack)
 
 ## 总体策略
 
-本项目将遵循“后端先行、分阶段迭代”的开发策略，技术栈统一为 **Python**。
+本项目将遵循“后端先行、分阶段迭代”的开发策略，技术栈统一为 **Python + SQLite**。
 
 1.  **后端先行**: 每个功能的开发都将从后端 API 开始，确保数据结构和业务逻辑正确无误。API 开发和测试通过后，前端再进行开发对接。
 2.  **分阶段迭代 (Phased Approach)**: 项目将分为三个主要里程碑，循序渐进地实现功能，降低一次性开发的复杂度和风险。
@@ -19,9 +19,10 @@
 ### P1.1: 后端 (Backend)
 -   [ ] **任务 P1.1.1: 项目初始化与数据库建模**
     -   [ ] 初始化 **Python** 项目并引入 **FastAPI** 框架。
-    -   [ ] 配置并连接 **MySQL** 数据库。
+    -   [ ] 配置 **SQLite** 数据库（单文件：`serversentinel.db`）。
     -   [ ] 引入 **SQLAlchemy** 作为 ORM，并使用 **Alembic** 进行数据库迁移管理。
     -   [ ] 根据 `design.md` 创建 `users`, `ssh_keys`, `nodes`, `devices`, `reservations`, `reservation_devices` 的 SQLAlchemy 模型并生成首次迁移。
+    -   [ ] 配置 SQLite 连接字符串：`sqlite:///./serversentinel.db`
 
 -   [ ] **任务 P1.1.2: 用户与公钥管理 API**
     -   [ ] `POST /api/login`: 实现基于白名单的用户登录认证 (使用 JWT)。

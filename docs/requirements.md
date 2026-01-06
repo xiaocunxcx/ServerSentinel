@@ -103,3 +103,5 @@
 2.  **Driver**: 目标服务器已预装华为 Ascend 驱动及 `npu-smi` 工具。
 3.  **Privilege**: ServerSentinel 系统需拥有目标服务器的 `root` 权限或免密 `sudo` 权限，以便修改 `/root/.ssh/authorized_keys` 或重启 SSHD 服务。
 4.  **Network**: 管理节点需能通过 SSH (Port 22) 访问所有工作节点。
+5.  **Database**: 使用 **SQLite** 作为嵌入式数据库，适合10-50台服务器规模的部署。单文件存储，便于备份和迁移。如未来规模扩大，可通过SQLAlchemy无缝迁移至PostgreSQL或MySQL。
+

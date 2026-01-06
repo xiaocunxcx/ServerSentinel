@@ -2,7 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str
+    # Database configuration - SQLite by default
+    DATABASE_URL: str = "sqlite:///./serversentinel.db"
 
     # JWT settings
     SECRET_KEY: str = "a_very_secret_key_that_should_be_changed"
@@ -13,3 +14,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

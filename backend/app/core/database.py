@@ -4,7 +4,14 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
-engine = create_engine(settings.DATABASE_URL)
+# SQLite-specific configuration
+# check_same_thread=False is needed for FastAPI to work with SQLite
+connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith("sqlite") else {}
+
+engine = create_engine(
+    settings.DATABASE_URL,
+    connect_args=connect_args
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -17,3 +24,4 @@ def get_db():
         yield db
     finally:
         db.close()
+
