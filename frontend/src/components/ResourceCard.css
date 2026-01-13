@@ -1,0 +1,105 @@
+.resource-card {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.resource-card-online {
+  border-left: 4px solid #52c41a;
+}
+
+.resource-card-offline {
+  border-left: 4px solid #ff4d4f;
+}
+
+.resource-card-maintenance {
+  border-left: 4px solid #faad14;
+}
+
+.resource-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.resource-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.resource-card-icon {
+  font-size: 20px;
+  color: #1890ff;
+}
+
+.resource-card-info {
+  margin-bottom: 16px;
+}
+
+.resource-card-info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.resource-card-info-item .label {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.resource-card-info-item .value {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.resource-card-info-item .value.success {
+  color: #52c41a;
+}
+
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.device-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.device-idle {
+  background: #52c41a;
+  color: white;
+}
+
+.device-reserved {
+  background: #ff4d4f;
+  color: white;
+}
+
+.device-offline {
+  background: #d9d9d9;
+  color: #8c8c8c;
+}
+
+.device-cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

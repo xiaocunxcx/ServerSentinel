@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ class DeviceCreate(DeviceBase):
 class Device(DeviceBase):
     id: int
     node_id: int
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -42,6 +44,8 @@ class Node(NodeBase):
     id: int
     status: str
     ssh_port: int = 22
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

@@ -1,44 +1,43 @@
-import {
-    AppstoreOutlined,
-    CloudOutlined,
-    DeploymentUnitOutlined,
-    KeyOutlined,
-    SettingOutlined,
-} from "@ant-design/icons";
+// import {
+//     AppstoreOutlined,
+//     CloudOutlined,
+//     DeploymentUnitOutlined,
+//     KeyOutlined,
+//     SettingOutlined,
+// } from "@ant-design/icons";
 import { Badge, Layout, Menu, Space } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { authStore } from "../api/client";
-import { getCurrentUser } from "../api/endpoints";
-import { CurrentUser } from "../api/types";
-import { clusterSummary } from "../data/mock";
+import { getCurrentUser, getNodes, getReservations } from "../api/endpoints";
+import { ClusterStats, CurrentUser, Node, Reservation } from "../api/types";
 
 const { Header, Sider, Content } = Layout;
 
 const items = [
     {
         key: "/",
-        icon: <AppstoreOutlined />,
+        // icon: <AppstoreOutlined />,
         label: <Link to="/">资源矩阵</Link>,
     },
     {
         key: "/reservations",
-        icon: <DeploymentUnitOutlined />,
+        // icon: <DeploymentUnitOutlined />,
         label: <Link to="/reservations">我的预约</Link>,
     },
     {
         key: "/nodes",
-        icon: <CloudOutlined />,
+        // icon: <CloudOutlined />,
         label: <Link to="/nodes">节点清单</Link>,
     },
     {
         key: "/keys",
-        icon: <KeyOutlined />,
+        // icon: <KeyOutlined />,
         label: <Link to="/keys">SSH 公钥</Link>,
     },
     {
         key: "/admin/assets",
-        icon: <SettingOutlined />,
+        // icon: <SettingOutlined />,
         label: <Link to="/admin/assets">资产管理</Link>,
     },
 ];
@@ -101,6 +100,15 @@ const getInitials = (value?: string) => {
 const AppLayout = () => {
     const location = useLocation();
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+    const [clusterSummary, setClusterSummary] = useState<ClusterStats>({
+        totalNodes: 0,
+        onlineNodes: 0,
+        offlineNodes: 0,
+        totalDevices: 0,
+        idleDevices: 0,
+        reservedDevices: 0,
+        activeReservations: 0,
+    });
     const selectedKey = items.find((item) =>
         location.pathname === "/"
             ? item.key === "/"
@@ -130,6 +138,111 @@ const AppLayout = () => {
             });
         return () => {
             ignore = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!authStore.getToken()) {
+            setClusterSummary({
+                totalNodes: 0,
+                onlineNodes: 0,
+                offlineNodes: 0,
+                totalDevices: 0,
+                idleDevices: 0,
+                reservedDevices: 0,
+                activeReservations: 0,
+            });
+            return;
+        }
+
+        let ignore = false;
+        const fetchSummary = async () => {
+            try {
+                const [nodesRes, reservationsRes] = await Promise.all([
+                    getNodes(),
+                    getReservations(),
+                ]);
+
+                if (ignore) {
+                    return;
+                }
+
+                const nodesData: Node[] = nodesRes.data;
+                const reservationsData: Reservation[] = reservationsRes.data;
+
+                const now = new Date();
+                const activeReservations = reservationsData.filter(
+                    (reservation) =>
+                        new Date(reservation.start_time) <= now &&
+                        new Date(reservation.end_time) > now,
+                );
+
+                const totalNodes = nodesData.length;
+                const onlineNodes = nodesData.filter(
+                    (node) => node.status === "online",
+                ).length;
+                const offlineNodes = nodesData.filter(
+                    (node) => node.status === "offline",
+                ).length;
+
+                let totalDevices = 0;
+                let reservedDevices = 0;
+                const deviceReservations = new Map<number, Reservation[]>();
+
+                activeReservations.forEach((reservation) => {
+                    if (!deviceReservations.has(reservation.node_id)) {
+                        deviceReservations.set(reservation.node_id, []);
+                    }
+                    deviceReservations
+                        .get(reservation.node_id)!
+                        .push(reservation);
+                });
+
+                nodesData.forEach((node) => {
+                    totalDevices += node.devices?.length || 0;
+
+                    const nodeReservations =
+                        deviceReservations.get(node.id) || [];
+                    const machineReservations = nodeReservations.filter(
+                        (reservation) => reservation.type === "machine",
+                    );
+
+                    if (machineReservations.length > 0) {
+                        reservedDevices += node.devices?.length || 0;
+                    } else {
+                        nodeReservations.forEach((reservation) => {
+                            if (reservation.reserved_devices) {
+                                reservedDevices +=
+                                    reservation.reserved_devices.length;
+                            }
+                        });
+                    }
+                });
+
+                const idleDevices = totalDevices - reservedDevices;
+
+                setClusterSummary({
+                    totalNodes,
+                    onlineNodes,
+                    offlineNodes,
+                    totalDevices,
+                    idleDevices,
+                    reservedDevices,
+                    activeReservations: activeReservations.length,
+                });
+            } catch (error) {
+                if (!ignore) {
+                    console.error("Failed to fetch cluster summary:", error);
+                }
+            }
+        };
+
+        fetchSummary();
+        const interval = setInterval(fetchSummary, 30000);
+
+        return () => {
+            ignore = true;
+            clearInterval(interval);
         };
     }, []);
 

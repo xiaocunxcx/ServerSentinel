@@ -327,6 +327,18 @@ erDiagram
 | ip_address | VARCHAR(45) | 客户端IP |
 | created_at | DATETIME | 创建时间 |
 
+### 3.3 索引与一致性约束
+
+- `users.username` 唯一索引
+- `users.email` 唯一索引
+- `ssh_keys.fingerprint` 唯一索引
+- `nodes.name` 唯一索引
+- `nodes.(ip_address, ssh_port)` 唯一索引
+- `devices.(node_id, device_index)` 唯一索引
+- `reservations.(node_id, start_time, end_time)` 复合索引（冲突检测）
+- `reservation_devices.(reservation_id, device_id)` 联合主键
+- 所有时间字段使用 UTC，统一在服务端转换与校验
+
 ## 4. API 端点设计
 
 ### 4.1 认证相关
@@ -479,7 +491,7 @@ erDiagram
   "type": "device",
   "start_time": "2026-01-10T09:00:00Z",
   "end_time": "2026-01-10T18:00:00Z",
-  "devices": [
+  "reserved_devices": [
     {"id": 1, "device_index": 0},
     {"id": 2, "device_index": 1}
   ],
@@ -538,6 +550,83 @@ Agent心跳。
   "node_id": 1,
   "status": "online",
   "timestamp": "2026-01-10T10:00:00Z"
+}
+```
+
+### 4.6 API 规范（统一约定）
+
+**错误体格式**：
+```json
+{
+  "error": "conflict",
+  "message": "reservation overlaps with existing reservation",
+  "details": {
+    "conflict_reservation_ids": [12, 13]
+  }
+}
+```
+
+**常用错误码**：
+- `400` 参数校验失败
+- `401` 未认证
+- `403` 无权限
+- `404` 资源不存在
+- `409` 预约冲突
+- `422` 业务规则冲突（如设备为空、时间无效）
+
+**分页与排序**：
+- 列表接口统一支持 `page`, `page_size`, `sort_by`, `order`。
+- 默认 `page=1`, `page_size=20`, `order=desc`。
+
+**幂等性约定**：
+- `DELETE /api/reservations/{id}` 多次调用返回相同结果（已释放返回 200）。
+- 设备级预约创建若重复提交，后端需确保不会产生重复记录（可选 `Idempotency-Key`）。
+
+### 4.7 冲突检测算法（时间段重叠）
+
+时间重叠条件（左闭右开）：
+```
+existing.start_time < new.end_time AND existing.end_time > new.start_time
+```
+
+**整机冲突 SQL 伪代码**：
+```sql
+SELECT id FROM reservations
+WHERE node_id = :node_id
+  AND status = 'active'
+  AND start_time < :new_end
+  AND end_time > :new_start;
+```
+
+**卡级冲突 SQL 伪代码**：
+```sql
+SELECT r.id FROM reservations r
+JOIN reservation_devices rd ON rd.reservation_id = r.id
+WHERE r.node_id = :node_id
+  AND r.status = 'active'
+  AND r.start_time < :new_end
+  AND r.end_time > :new_start
+  AND rd.device_id IN (:device_ids);
+```
+
+### 4.8 Agent 本地授权缓存格式（Phase 3）
+
+文件路径：`/var/run/serversentinel/auth.json`
+
+```json
+{
+  "node_id": 1,
+  "generated_at": "2026-01-10T10:00:00Z",
+  "authorizations": [
+    {
+      "username": "zhangsan",
+      "ssh_keys": [
+        "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB..."
+      ],
+      "devices": [0, 1],
+      "expires_at": "2026-01-10T18:00:00Z"
+    }
+  ]
 }
 ```
 

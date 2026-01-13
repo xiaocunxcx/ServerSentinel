@@ -1,5 +1,7 @@
-from fastapi import FastAPI
 import sys
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.endpoints import auth, nodes, reservations, users
 from app.core.config import settings
@@ -8,6 +10,18 @@ app = FastAPI(
     title="ServerSentinel API",
     description="Backend service for ServerSentinel, managing NPU server reservations.",
     version="0.1.0",
+)
+
+# CORS: allow local frontend dev server
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include all API routers
@@ -36,7 +50,7 @@ def health_check():
         "service": "ServerSentinel API",
         "version": "0.1.0",
         "database": "sqlite",
-        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
     }
 
 
@@ -46,4 +60,3 @@ def on_startup():
     # For now, we rely on Alembic for DB setup.
     print("ServerSentinel API startup complete.")
     print(f"Python version: {sys.version}")
-

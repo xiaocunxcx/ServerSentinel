@@ -1,3 +1,18 @@
+/* CSS Variables */
+:root {
+    --bg-base: #fafbfc;
+    --bg-accent: #f5f7fa;
+    --surface: #ffffff;
+    --surface-muted: #f5f7fa;
+    --ink: #1a202c;
+    --ink-muted: #718096;
+    --border: #e2e8f0;
+    --accent: #0c8c7d;
+    --accent-soft: #e6f7f5;
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
 * {
     box-sizing: border-box;
 }

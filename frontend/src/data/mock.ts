@@ -1,0 +1,136 @@
+import { Node, Reservation, ClusterStats } from '../api/types'
+
+// 集群统计数据
+export const clusterSummary: ClusterStats = {
+  totalNodes: 8,
+  onlineNodes: 7,
+  offlineNodes: 1,
+  totalDevices: 64,
+  idleDevices: 42,
+  reservedDevices: 22,
+  activeReservations: 12,
+}
+
+// 节点数据
+export const nodes: Node[] = [
+  {
+    id: 1,
+    name: 'node-01',
+    ip_address: '192.168.1.101',
+    ssh_port: 22,
+    status: 'online',
+    created_at: '2026-01-01T10:00:00Z',
+    updated_at: '2026-01-06T10:00:00Z',
+    devices: [
+      { id: 1, node_id: 1, device_index: 0, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 2, node_id: 1, device_index: 1, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 3, node_id: 1, device_index: 2, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 4, node_id: 1, device_index: 3, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 5, node_id: 1, device_index: 4, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 6, node_id: 1, device_index: 5, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 7, node_id: 1, device_index: 6, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 8, node_id: 1, device_index: 7, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+    ],
+  },
+  {
+    id: 2,
+    name: 'node-02',
+    ip_address: '192.168.1.102',
+    ssh_port: 22,
+    status: 'online',
+    created_at: '2026-01-01T10:00:00Z',
+    updated_at: '2026-01-06T10:00:00Z',
+    devices: [
+      { id: 9, node_id: 2, device_index: 0, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 10, node_id: 2, device_index: 1, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 11, node_id: 2, device_index: 2, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 12, node_id: 2, device_index: 3, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 13, node_id: 2, device_index: 4, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 14, node_id: 2, device_index: 5, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 15, node_id: 2, device_index: 6, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 16, node_id: 2, device_index: 7, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+    ],
+  },
+  {
+    id: 3,
+    name: 'node-03',
+    ip_address: '192.168.1.103',
+    ssh_port: 22,
+    status: 'online',
+    created_at: '2026-01-01T10:00:00Z',
+    updated_at: '2026-01-06T10:00:00Z',
+    devices: [
+      { id: 17, node_id: 3, device_index: 0, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 18, node_id: 3, device_index: 1, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 19, node_id: 3, device_index: 2, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 20, node_id: 3, device_index: 3, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 21, node_id: 3, device_index: 4, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 22, node_id: 3, device_index: 5, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 23, node_id: 3, device_index: 6, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 24, node_id: 3, device_index: 7, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+    ],
+  },
+  {
+    id: 4,
+    name: 'node-04',
+    ip_address: '192.168.1.104',
+    ssh_port: 22,
+    status: 'offline',
+    created_at: '2026-01-01T10:00:00Z',
+    updated_at: '2026-01-06T10:00:00Z',
+    devices: [
+      { id: 25, node_id: 4, device_index: 0, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 26, node_id: 4, device_index: 1, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 27, node_id: 4, device_index: 2, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 28, node_id: 4, device_index: 3, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 29, node_id: 4, device_index: 4, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 30, node_id: 4, device_index: 5, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 31, node_id: 4, device_index: 6, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 32, node_id: 4, device_index: 7, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+    ],
+  },
+]
+
+// 预约数据
+export const reservations: Reservation[] = [
+  {
+    id: 1,
+    user_id: 1,
+    node_id: 1,
+    start_time: '2026-01-06T09:00:00Z',
+    end_time: '2026-01-06T18:00:00Z',
+    type: 'machine',
+    created_at: '2026-01-05T15:00:00Z',
+    updated_at: '2026-01-05T15:00:00Z',
+  },
+  {
+    id: 2,
+    user_id: 2,
+    node_id: 2,
+    start_time: '2026-01-06T10:00:00Z',
+    end_time: '2026-01-06T16:00:00Z',
+    type: 'device',
+    created_at: '2026-01-05T16:00:00Z',
+    updated_at: '2026-01-05T16:00:00Z',
+    reserved_devices: [
+      { id: 9, node_id: 2, device_index: 0, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 10, node_id: 2, device_index: 1, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+    ],
+  },
+  {
+    id: 3,
+    user_id: 1,
+    node_id: 3,
+    start_time: '2026-01-07T09:00:00Z',
+    end_time: '2026-01-07T18:00:00Z',
+    type: 'device',
+    created_at: '2026-01-06T10:00:00Z',
+    updated_at: '2026-01-06T10:00:00Z',
+    reserved_devices: [
+      { id: 17, node_id: 3, device_index: 0, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 18, node_id: 3, device_index: 1, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 19, node_id: 3, device_index: 2, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+      { id: 20, node_id: 3, device_index: 3, model_name: 'Ascend 910B', created_at: '2026-01-01T10:00:00Z' },
+    ],
+  },
+]
