@@ -1,11 +1,12 @@
-// import {
-//     AppstoreOutlined,
-//     CloudOutlined,
-//     DeploymentUnitOutlined,
-//     KeyOutlined,
-//     SettingOutlined,
-// } from "@ant-design/icons";
-import { Badge, Layout, Menu, Space } from "antd";
+import {
+    AppstoreOutlined,
+    CloudOutlined,
+    DeploymentUnitOutlined,
+    KeyOutlined,
+    SettingOutlined,
+    MenuOutlined,
+} from "@ant-design/icons";
+import { Badge, Drawer, Layout, Menu, Space, Button } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { authStore } from "../api/client";
@@ -17,27 +18,27 @@ const { Header, Sider, Content } = Layout;
 const items = [
     {
         key: "/",
-        // icon: <AppstoreOutlined />,
+        icon: <AppstoreOutlined />,
         label: <Link to="/">资源矩阵</Link>,
     },
     {
         key: "/reservations",
-        // icon: <DeploymentUnitOutlined />,
+        icon: <DeploymentUnitOutlined />,
         label: <Link to="/reservations">我的预约</Link>,
     },
     {
         key: "/nodes",
-        // icon: <CloudOutlined />,
+        icon: <CloudOutlined />,
         label: <Link to="/nodes">节点清单</Link>,
     },
     {
         key: "/keys",
-        // icon: <KeyOutlined />,
+        icon: <KeyOutlined />,
         label: <Link to="/keys">SSH 公钥</Link>,
     },
     {
         key: "/admin/assets",
-        // icon: <SettingOutlined />,
+        icon: <SettingOutlined />,
         label: <Link to="/admin/assets">资产管理</Link>,
     },
 ];
@@ -100,6 +101,7 @@ const getInitials = (value?: string) => {
 const AppLayout = () => {
     const location = useLocation();
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [clusterSummary, setClusterSummary] = useState<ClusterStats>({
         totalNodes: 0,
         onlineNodes: 0,
@@ -255,7 +257,7 @@ const AppLayout = () => {
 
     return (
         <Layout className="app-shell">
-            <Sider width={260} className="app-sider">
+            <Sider width={260} className="app-sider desktop-only">
                 <div className="brand">
                     <div className="brand-mark">SS</div>
                     <div>
@@ -288,10 +290,18 @@ const AppLayout = () => {
             </Sider>
             <Layout>
                 <Header className="app-header">
-                    <div>
-                        <div className="header-title">{headerMeta.title}</div>
-                        <div className="header-subtitle">
-                            {headerMeta.subtitle}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        <Button
+                            className="mobile-menu-button"
+                            type="text"
+                            icon={<MenuOutlined />}
+                            onClick={() => setMobileMenuOpen(true)}
+                        />
+                        <div style={{ flex: 1 }}>
+                            <div className="header-title">{headerMeta.title}</div>
+                            <div className="header-subtitle">
+                                {headerMeta.subtitle}
+                            </div>
                         </div>
                     </div>
                     <Space size={16} wrap>
@@ -313,6 +323,27 @@ const AppLayout = () => {
                     <Outlet />
                 </Content>
             </Layout>
+            <Drawer
+                title={
+                    <div>
+                        <div className="brand-title">ServerSentinel</div>
+                        <div className="brand-subtitle">
+                            NPU Resource Command
+                        </div>
+                    </div>
+                }
+                placement="left"
+                onClose={() => setMobileMenuOpen(false)}
+                open={mobileMenuOpen}
+                bodyStyle={{ padding: 0 }}
+            >
+                <Menu
+                    mode="inline"
+                    items={items}
+                    selectedKeys={selectedKey ? [selectedKey] : []}
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+            </Drawer>
         </Layout>
     );
 };

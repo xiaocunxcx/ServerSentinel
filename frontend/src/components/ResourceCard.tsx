@@ -1,14 +1,16 @@
 import { Card, Tag, Tooltip } from 'antd'
-// import { ServerOutlined } from '@ant-design/icons'
-import { Node } from '../api/types'
+import { CloudServerOutlined } from '@ant-design/icons'
+import { Node, Reservation, CurrentUser } from '../api/types'
 import './ResourceCard.css'
 
 interface ResourceCardProps {
   node: Node
+  reservations?: Reservation[]
+  currentUser?: CurrentUser | null
   onClick?: () => void
 }
 
-const ResourceCard: React.FC<ResourceCardProps> = ({ node, onClick }) => {
+const ResourceCard: React.FC<ResourceCardProps> = ({ node, reservations = [], currentUser, onClick }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online':
@@ -35,7 +37,74 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ node, onClick }) => {
     }
   }
 
-  const idleDeviceCount = node.devices?.length || 0
+  const getDeviceStatus = (deviceId: number): 'idle' | 'busy' | 'mine' | 'offline' => {
+    if (node.status !== 'online') {
+      return 'offline'
+    }
+
+    const nodeReservations = reservations.filter(r => r.node_id === node.id)
+    const machineReservations = nodeReservations.filter(r => r.type === 'machine')
+
+    if (machineReservations.length > 0) {
+      const reservation = machineReservations[0]
+      const isMine = currentUser && reservation.user_id === currentUser.id
+      return isMine ? 'mine' : 'busy'
+    }
+
+    const deviceReservations = nodeReservations.filter(r =>
+      r.type === 'device' &&
+      r.reserved_devices?.some(d => d.id === deviceId)
+    )
+
+    if (deviceReservations.length > 0) {
+      const reservation = deviceReservations[0]
+      const isMine = currentUser && reservation.user_id === currentUser.id
+      return isMine ? 'mine' : 'busy'
+    }
+
+    return 'idle'
+  }
+
+  const getDeviceStatusClass = (status: string) => {
+    const statusMap: Record<string, string> = {
+      idle: 'device-idle',
+      busy: 'device-busy',
+      mine: 'device-mine',
+      offline: 'device-offline',
+    }
+    return statusMap[status] || 'device-idle'
+  }
+
+  const getDeviceTooltip = (device: any, status: string) => {
+    if (status === 'offline') return `Device ${device.device_index} - ${device.model_name} (离线)`
+    if (status === 'idle') return `Device ${device.device_index} - ${device.model_name} (空闲)`
+
+    const nodeReservations = reservations.filter(r => r.node_id === node.id)
+    const machineReservations = nodeReservations.filter(r => r.type === 'machine')
+
+    if (machineReservations.length > 0) {
+      const reservation = machineReservations[0]
+      const isMine = currentUser && reservation.user_id === currentUser.id
+      const ownership = isMine ? '我的' : '已占用'
+      return `Device ${device.device_index} - ${device.model_name} (${ownership} - 整机预约)`
+    }
+
+    const deviceReservations = nodeReservations.filter(r =>
+      r.type === 'device' &&
+      r.reserved_devices?.some(d => d.id === device.id)
+    )
+
+    if (deviceReservations.length > 0) {
+      const reservation = deviceReservations[0]
+      const isMine = currentUser && reservation.user_id === currentUser.id
+      const ownership = isMine ? '我的' : '已占用'
+      return `Device ${device.device_index} - ${device.model_name} (${ownership})`
+    }
+
+    return `Device ${device.device_index} - ${device.model_name}`
+  }
+
+  const idleDevices = node.devices?.filter(device => getDeviceStatus(device.id) === 'idle').length || 0
 
   return (
     <Card
@@ -45,7 +114,7 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ node, onClick }) => {
     >
       <div className="resource-card-header">
         <div className="resource-card-title">
-          {/* <ServerOutlined className="resource-card-icon" /> */}
+          <CloudServerOutlined className="resource-card-icon" />
           <span>{node.name}</span>
         </div>
         <Tag color={getStatusColor(node.status)}>
@@ -64,21 +133,26 @@ const ResourceCard: React.FC<ResourceCardProps> = ({ node, onClick }) => {
         </div>
         <div className="resource-card-info-item">
           <span className="label">空闲设备:</span>
-          <span className="value success">{idleDeviceCount}</span>
+          <span className="value success">{idleDevices}</span>
         </div>
       </div>
 
       <div className="device-grid">
-        {node.devices?.map((device) => (
-          <Tooltip
-            key={device.id}
-            title={`Device ${device.device_index} - ${device.model_name}`}
-          >
-            <div className="device-cell device-idle">
-              {device.device_index}
-            </div>
-          </Tooltip>
-        ))}
+        {node.devices?.map((device) => {
+          const deviceStatus = getDeviceStatus(device.id)
+          const statusClass = getDeviceStatusClass(deviceStatus)
+
+          return (
+            <Tooltip
+              key={device.id}
+              title={getDeviceTooltip(device, deviceStatus)}
+            >
+              <div className={`device-cell ${statusClass}`}>
+                {device.device_index}
+              </div>
+            </Tooltip>
+          )
+        })}
       </div>
     </Card>
   )

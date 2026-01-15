@@ -5,7 +5,7 @@ import {
     List,
     Modal,
     Popconfirm,
-    Spin,
+    Skeleton,
     message,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -73,13 +73,10 @@ const Keys = () => {
             </div>
             <div className="panel-card">
                 {loading && keys.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "50px" }}>
-                        <Spin size="large" />
-                    </div>
-                ) : (
+                    <Skeleton active paragraph={{ rows: 5 }} />
+                ) : keys.length > 0 ? (
                     <List
                         dataSource={keys}
-                        locale={{ emptyText: "暂无公钥" }}
                         renderItem={(item) => (
                             <List.Item
                                 actions={[
@@ -105,6 +102,16 @@ const Keys = () => {
                             </List.Item>
                         )}
                     />
+                ) : (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '60px 20px',
+                        color: 'var(--ink-muted)'
+                    }}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔑</div>
+                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>暂无 SSH 公钥</div>
+                        <div>点击上方按钮添加您的第一个 SSH 公钥</div>
+                    </div>
                 )}
             </div>
             <Modal

@@ -1,11 +1,12 @@
 .resource-card {
   height: 100%;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideIn 0.4s ease;
 }
 
 .resource-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
 }
 
 .resource-card-online {
@@ -89,8 +90,13 @@
   color: white;
 }
 
-.device-reserved {
+.device-busy {
   background: #ff4d4f;
+  color: white;
+}
+
+.device-mine {
+  background: #1890ff;
   color: white;
 }
 

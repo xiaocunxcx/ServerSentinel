@@ -8,7 +8,7 @@ import {
     Tag,
     message,
     Popconfirm,
-    Spin,
+    Skeleton,
 } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
@@ -227,16 +227,24 @@ const Reservations = () => {
             </div>
             <div className="panel-card">
                 {loading && reservations.length === 0 ? (
-                    <div style={{ textAlign: "center", padding: "50px" }}>
-                        <Spin size="large" />
-                    </div>
-                ) : (
+                    <Skeleton active paragraph={{ rows: 10 }} />
+                ) : reservations.length > 0 ? (
                     <Table
                         columns={columns}
                         dataSource={reservations}
                         pagination={{ pageSize: 10 }}
                         rowKey="id"
                     />
+                ) : (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '60px 20px',
+                        color: 'var(--ink-muted)'
+                    }}>
+                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
+                        <div style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>暂无预约记录</div>
+                        <div>点击上方按钮创建您的第一个预约</div>
+                    </div>
                 )}
             </div>
             <Modal
