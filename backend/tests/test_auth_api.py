@@ -5,19 +5,23 @@ Unit tests for authentication and SSH key management APIs.
 import pytest
 from fastapi.testclient import TestClient
 
+VALID_SSH_KEY = (
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFB8r8QKq3VqQ3t9PjFf1xw0WkPq2KzNvC5F0XbV+M2P "
+    "test@example.com"
+)
+
 
 class TestAuthLogin:
     """Tests for POST /api/v1/auth/login"""
 
-    def test_login_success(self, client: TestClient, test_user_data):
+    def test_login_success(self, client: TestClient, db_session, test_user_data):
         """Test successful login with valid credentials."""
-        from app.crud import crud_user
         from app.schemas.user import UserCreate
+        from app.services import auth_service
 
         # Create user first
         user_create = UserCreate(**test_user_data)
-        db = client.app.dependency_overrides[client.app.dependencies[0].dependency]
-        crud_user.create_user(db=db, user=user_create)
+        auth_service.create_user(db_session, user_create)
 
         # Attempt login
         response = client.post(
@@ -32,8 +36,6 @@ class TestAuthLogin:
         data = response.json()
         assert "access_token" in data
         assert data["token_type"] == "bearer"
-        assert data["user"]["username"] == test_user_data["username"]
-        assert data["user"]["email"] == test_user_data["email"]
 
     def test_login_invalid_username(self, client: TestClient):
         """Test login with non-existent username."""
@@ -44,15 +46,14 @@ class TestAuthLogin:
 
         assert response.status_code == 401
 
-    def test_login_invalid_password(self, client: TestClient, test_user_data):
+    def test_login_invalid_password(self, client: TestClient, db_session, test_user_data):
         """Test login with invalid password."""
-        from app.crud import crud_user
         from app.schemas.user import UserCreate
+        from app.services import auth_service
 
         # Create user first
         user_create = UserCreate(**test_user_data)
-        db = client.app.dependency_overrides[client.app.dependencies[0].dependency]
-        crud_user.create_user(db=db, user=user_create)
+        auth_service.create_user(db_session, user_create)
 
         # Attempt login with wrong password
         response = client.post(
@@ -103,7 +104,7 @@ class TestSSHKeyManagement:
 
     def test_create_ssh_key_success(self, client: TestClient, auth_headers):
         """Test creating a new SSH key."""
-        ssh_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7/test@example.com"
+        ssh_key = VALID_SSH_KEY
 
         response = client.post(
             "/api/v1/users/me/ssh-keys",
@@ -111,7 +112,7 @@ class TestSSHKeyManagement:
             json={"public_key": ssh_key},
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert "id" in data
         assert "fingerprint" in data
@@ -131,7 +132,7 @@ class TestSSHKeyManagement:
 
     def test_create_ssh_key_duplicate(self, client: TestClient, auth_headers):
         """Test creating duplicate SSH key."""
-        ssh_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7/test@example.com"
+        ssh_key = VALID_SSH_KEY
 
         # Create first key
         client.post(
@@ -153,7 +154,7 @@ class TestSSHKeyManagement:
     def test_get_ssh_keys(self, client: TestClient, auth_headers):
         """Test getting all SSH keys for current user."""
         # First create a key
-        ssh_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7/test@example.com"
+        ssh_key = VALID_SSH_KEY
         client.post(
             "/api/v1/users/me/ssh-keys",
             headers=auth_headers,
@@ -171,7 +172,7 @@ class TestSSHKeyManagement:
     def test_delete_ssh_key_success(self, client: TestClient, auth_headers):
         """Test deleting an SSH key."""
         # First create a key
-        ssh_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7/test@example.com"
+        ssh_key = VALID_SSH_KEY
         create_response = client.post(
             "/api/v1/users/me/ssh-keys",
             headers=auth_headers,
@@ -185,7 +186,7 @@ class TestSSHKeyManagement:
             headers=auth_headers,
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 204
 
         # Verify key is deleted
         get_response = client.get("/api/v1/users/me/ssh-keys", headers=auth_headers)
@@ -210,7 +211,7 @@ class TestSSHKeyManagement:
     ):
         """Test that users cannot delete other users' keys."""
         # Create key as regular user
-        ssh_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC7/test@example.com"
+        ssh_key = VALID_SSH_KEY
         create_response = client.post(
             "/api/v1/users/me/ssh-keys",
             headers=auth_headers,

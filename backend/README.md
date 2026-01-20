@@ -20,13 +20,7 @@ ServerSentinel 后端服务，基于 FastAPI + SQLAlchemy，默认使用 SQLite�
 
 ## 快速开始
 
-### 方式一：一键脚本
-
-```bash
-./migrate_to_python313.sh
-```
-
-### 方式二：手动
+### 手动启动
 
 ```bash
 python3.13 -m venv venv
@@ -34,13 +28,16 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+cp .env.example .env
+# 编辑 .env 中的 SECRET_KEY
+
 PYTHONPATH=. alembic upgrade head
-PYTHONPATH=. uvicorn app.main:app --reload
+PYTHONPATH=. uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ## 环境变量
 
-创建 `.env` 并配置：
+从 `.env.example` 复制并修改：
 
 ```bash
 DATABASE_URL=sqlite:///./serversentinel.db
@@ -67,6 +64,5 @@ pytest
 
 ## 相关文档
 
-- `QUICK_START.md`
 - `../docs/design.md`
 - `../docs/SQLITE_MIGRATION.md`

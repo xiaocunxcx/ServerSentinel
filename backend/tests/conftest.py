@@ -6,11 +6,13 @@ import asyncio
 from typing import AsyncGenerator, Generator
 
 import pytest
+import app.models  # Register models before creating tables.
 from app.core.database import Base, get_db
 from app.main import app
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Use in-memory SQLite for testing
 TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -18,6 +20,7 @@ TEST_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(
     TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -77,20 +80,16 @@ def test_admin_data():
 
 
 @pytest.fixture
-def auth_headers(client: TestClient, test_user_data):
+def auth_headers(client: TestClient, db_session: Session, test_user_data):
     """
     Create a test user and return authentication headers.
     """
-    from app.core.security import hash_password
-    from app.crud import crud_user
     from app.schemas.user import UserCreate
+    from app.services import auth_service
 
     # Create user in database
     user_create = UserCreate(**test_user_data)
-    user = crud_user.create_user(
-        db=client.app.dependency_overrides[get_db](),
-        user=user_create,
-    )
+    auth_service.create_user(db_session, user_create)
 
     # Login and get token
     response = client.post(
@@ -105,20 +104,16 @@ def auth_headers(client: TestClient, test_user_data):
 
 
 @pytest.fixture
-def admin_headers(client: TestClient, test_admin_data):
+def admin_headers(client: TestClient, db_session: Session, test_admin_data):
     """
     Create an admin user and return authentication headers.
     """
-    from app.core.security import hash_password
-    from app.crud import crud_user
     from app.schemas.user import UserCreate
+    from app.services import auth_service
 
     # Create admin in database
     admin_create = UserCreate(**test_admin_data)
-    admin = crud_user.create_user(
-        db=client.app.dependency_overrides[get_db](),
-        user=admin_create,
-    )
+    auth_service.create_user(db_session, admin_create)
 
     # Login and get token
     response = client.post(
